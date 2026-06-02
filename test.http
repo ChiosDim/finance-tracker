@@ -1,0 +1,29 @@
+### Get all transactions (empty list for now)
+GET http://localhost:8080/api/transactions
+
+### Add an income
+POST http://localhost:8080/api/transactions
+Content-Type: application/json
+
+{
+  "description": "Monthly salary",
+  "amount": 2500,
+  "type": "INCOME",
+  "category": "Salary",
+  "date": "2026-06-01"
+}
+
+### Add an expense
+POST http://localhost:8080/api/transactions
+Content-Type: application/json
+
+{
+  "description": "Groceries",
+  "amount": 80,
+  "type": "EXPENSE",
+  "category": "Food",
+  "date": "2026-06-01"
+}
+
+### Get summary
+GET http://localhost:8080/api/transactions/summary
