@@ -39,4 +39,10 @@ public class TransactionController {
     public Map<String, Double> getSummary() {
         return service.getSummary();
     }
+
+    // GET http://localhost:8080/api/transactions/categories
+    @GetMapping("/categories")
+    public Map<String, Double> getCategories() {
+        return service.getCategoryBreakdown();
+    }
 }

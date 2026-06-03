@@ -39,7 +39,11 @@
 
     <div class="form-group">
         <label class="form-label">Date</label>
-        <input type="date" class="form-control" @bind="selectedDate" />
+        <input type="text"
+            class="form-control"
+            @bind="selectedDate"
+            @bind:format="dd/MM/yyyy"
+            placeholder="DD/MM/YYYY" />
     </div>
 
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -59,19 +63,28 @@
     private DateTime selectedDate = DateTime.Today;
     private string errorMessage = "";
 
-    private async Task Submit()
+  private async Task Submit()
+{
+    if (string.IsNullOrWhiteSpace(newTransaction.Description) ||
+        string.IsNullOrWhiteSpace(newTransaction.Type) ||
+        string.IsNullOrWhiteSpace(newTransaction.Category) ||
+        newTransaction.Amount <= 0)
     {
-        if (string.IsNullOrWhiteSpace(newTransaction.Description) ||
-            string.IsNullOrWhiteSpace(newTransaction.Type) ||
-            string.IsNullOrWhiteSpace(newTransaction.Category) ||
-            newTransaction.Amount <= 0)
-        {
-            errorMessage = "Please fill in all fields with valid values.";
-            return;
-        }
+        errorMessage = "Please fill in all fields with valid values.";
+        return;
+    }
 
-        newTransaction.Date = selectedDate.ToString("yyyy-MM-dd");
-        await Http.PostAsJsonAsync("api/transactions", newTransaction);
+    newTransaction.Date = selectedDate.ToString("yyyy-MM-dd");
+
+    var response = await Http.PostAsJsonAsync("api/transactions", newTransaction);
+
+    if (response.IsSuccessStatusCode)
+    {
         Nav.NavigateTo("/");
     }
+    else
+    {
+        errorMessage = $"Failed to save transaction. Server returned: {(int)response.StatusCode}";
+    }
+}
 }

@@ -46,3 +46,6 @@ build/
 # ===== OS files =====
 .DS_Store
 Thumbs.db
+
+# H2 database files
+backend/data/
