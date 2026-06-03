@@ -1,0 +1,77 @@
+@page "/add"
+@inject HttpClient Http
+@inject NavigationManager Nav
+@using frontend.Models
+
+<PageTitle>Add Transaction — Finance Tracker</PageTitle>
+
+<h1 class="page-title">Add Transaction</h1>
+<p class="page-subtitle">Record a new income or expense</p>
+
+<div class="form-card">
+
+    <div class="form-group">
+        <label class="form-label">Description</label>
+        <input class="form-control" @bind="newTransaction.Description"
+               placeholder="e.g. Monthly salary" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Amount (€)</label>
+        <input type="number" class="form-control" @bind="newTransaction.Amount"
+               placeholder="0.00" min="0" step="0.01" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-select" @bind="newTransaction.Type">
+            <option value="">— Select type —</option>
+            <option value="INCOME">Income</option>
+            <option value="EXPENSE">Expense</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Category</label>
+        <input class="form-control" @bind="newTransaction.Category"
+               placeholder="e.g. Salary, Food, Rent" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-control" @bind="selectedDate" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="error-msg">@errorMessage</div>
+    }
+
+    <div class="form-actions">
+        <button class="btn-primary" @onclick="Submit">Save Transaction</button>
+        <a href="/" class="btn-ghost">Cancel</a>
+    </div>
+
+</div>
+
+@code {
+    private Transaction newTransaction = new();
+    private DateTime selectedDate = DateTime.Today;
+    private string errorMessage = "";
+
+    private async Task Submit()
+    {
+        if (string.IsNullOrWhiteSpace(newTransaction.Description) ||
+            string.IsNullOrWhiteSpace(newTransaction.Type) ||
+            string.IsNullOrWhiteSpace(newTransaction.Category) ||
+            newTransaction.Amount <= 0)
+        {
+            errorMessage = "Please fill in all fields with valid values.";
+            return;
+        }
+
+        newTransaction.Date = selectedDate.ToString("yyyy-MM-dd");
+        await Http.PostAsJsonAsync("api/transactions", newTransaction);
+        Nav.NavigateTo("/");
+    }
+}

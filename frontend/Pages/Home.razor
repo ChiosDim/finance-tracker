@@ -1,0 +1,101 @@
+@page "/"
+@inject HttpClient Http
+@using frontend.Models
+
+<PageTitle>Dashboard — Finance Tracker</PageTitle>
+
+<h1 class="page-title">Dashboard</h1>
+<p class="page-subtitle">Your financial overview at a glance</p>
+
+@if (summary != null)
+{
+    <div class="summary-grid">
+        <div class="summary-card income">
+            <div class="summary-label">Total Income</div>
+            <div class="summary-amount">+€@summary.Income.ToString("F2")</div>
+        </div>
+        <div class="summary-card expense">
+            <div class="summary-label">Total Expenses</div>
+            <div class="summary-amount">-€@summary.Expense.ToString("F2")</div>
+        </div>
+        <div class="summary-card balance">
+            <div class="summary-label">Balance</div>
+            <div class="summary-amount">€@summary.Balance.ToString("F2")</div>
+        </div>
+    </div>
+}
+
+<div class="section-header">
+    <span class="section-title">Transactions</span>
+    <a href="/add" class="btn-primary">＋ Add Transaction</a>
+</div>
+
+@if (transactions == null)
+{
+    <p class="loading">Loading transactions...</p>
+}
+else if (!transactions.Any())
+{
+    <div class="tx-table">
+        <div class="empty-state">No transactions yet — add one to get started.</div>
+    </div>
+}
+else
+{
+    <div class="tx-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in transactions)
+                {
+                    <tr>
+                        <td><span class="tx-date">@t.Date</span></td>
+                        <td>@t.Description</td>
+                        <td>@t.Category</td>
+                        <td>
+                            <span class="badge @t.Type.ToLower()">@t.Type</span>
+                        </td>
+                        <td>
+                            <span class="tx-amount @t.Type.ToLower()">
+                                @(t.Type == "INCOME" ? "+" : "-")€@t.Amount.ToString("F2")
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-danger-sm" @onclick="() => Delete(t.Id)">
+                                remove
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<Transaction>? transactions;
+    private Summary? summary;
+
+    protected override async Task OnInitializedAsync() => await LoadData();
+
+    private async Task LoadData()
+    {
+        transactions = await Http.GetFromJsonAsync<List<Transaction>>("api/transactions");
+        summary      = await Http.GetFromJsonAsync<Summary>("api/transactions/summary");
+    }
+
+    private async Task Delete(long id)
+    {
+        await Http.DeleteAsync($"api/transactions/{id}");
+        await LoadData();
+    }
+}
