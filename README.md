@@ -171,7 +171,7 @@ finance-tracker/
 
 **Dimitrios Chios**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-yourusername-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/in/dimitris-chios)
+[![LinkedIn](https://img.shields.io/badge/Dimitris-Chios-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/in/dimitris-chios)
 
 ---
 
