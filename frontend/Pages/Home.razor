@@ -1,8 +1,9 @@
+@namespace frontend.Pages
 @page "/"
 @inject HttpClient Http
-@using frontend.Models
+@inject IJSRuntime JS
 
-<PageTitle>Dashboard — Finance Tracker</PageTitle>
+<PageTitle>Dashboard - Finance Tracker</PageTitle>
 
 <h1 class="page-title">Dashboard</h1>
 <p class="page-subtitle">Your financial overview at a glance</p>
@@ -12,69 +13,121 @@
     <div class="summary-grid">
         <div class="summary-card income">
             <div class="summary-label">Total Income</div>
-            <div class="summary-amount">+€@summary.Income.ToString("F2")</div>
-            <div class="summary-count">@transactions?.Count(t => t.Type == "INCOME") transactions</div>
+            <div class="summary-amount">+EUR @FormatNumber(summary.Income)</div>
+            <div class="summary-count">@(transactions?.Count(t => t.Type == "INCOME") ?? 0) transactions</div>
         </div>
         <div class="summary-card expense">
             <div class="summary-label">Total Expenses</div>
-            <div class="summary-amount">-€@summary.Expense.ToString("F2")</div>
-            <div class="summary-count">@transactions?.Count(t => t.Type == "EXPENSE") transactions</div>
+            <div class="summary-amount">-EUR @FormatNumber(summary.Expense)</div>
+            <div class="summary-count">@(transactions?.Count(t => t.Type == "EXPENSE") ?? 0) transactions</div>
         </div>
         <div class="summary-card balance">
             <div class="summary-label">Balance</div>
-            <div class="summary-amount">€@summary.Balance.ToString("F2")</div>
-            <div class="summary-count">@transactions?.Count total transactions</div>
+            <div class="summary-amount">EUR @FormatNumber(summary.Balance)</div>
+            <div class="summary-count">@(transactions?.Count ?? 0) total transactions</div>
         </div>
     </div>
 }
 
-@if (categories != null && categories.Any())
+@if (barItems.Any() || donutSlices.Any())
 {
-    <div class="section-header" style="margin-top:0">
-        <span class="section-title">Spending by Category</span>
-    </div>
-    <div class="category-grid">
-        @foreach (var cat in categories.OrderByDescending(c => c.Value))
+    <div class="charts-row">
+
+        @if (barItems.Any())
         {
-            var pct = summary?.Expense > 0
-                ? (int)Math.Round(cat.Value / summary!.Expense * 100)
-                : 0;
-            <div class="category-card">
-                <div class="category-top">
-                    <span class="category-name">@cat.Key</span>
-                    <span class="category-pct">@pct%</span>
-                </div>
-                <div class="category-bar-bg">
-                    <div class="category-bar-fill" style="width:@pct%"></div>
-                </div>
-                <div class="category-amount">-€@cat.Value.ToString("F2")</div>
+            <div class="chart-card">
+                <div class="chart-card-title">Monthly overview</div>
+                <svg viewBox="0 0 490 220" class="bar-chart-svg">
+                    @foreach (var tick in yTicks)
+                    {
+                        <line x1="48" y1="@tick.Y" x2="485" y2="@tick.Y" class="chart-grid-line" />
+                        @SvgText("44", tick.LabelY, "chart-axis-label", tick.Label, "end")
+                    }
+                    <line x1="48" y1="175" x2="485" y2="175" class="chart-base-line" />
+                    @foreach (var bar in barItems)
+                    {
+                        <rect x="@bar.IncomeX" y="@bar.IncomeY" width="@bar.BarW" height="@bar.IncomeH" class="bar-income" rx="3" />
+                        <rect x="@bar.ExpenseX" y="@bar.ExpenseY" width="@bar.BarW" height="@bar.ExpenseH" class="bar-expense" rx="3" />
+                        @SvgText(bar.LabelX, "190", "chart-axis-label", bar.Label, "middle")
+                    }
+                    <rect x="52" y="205" width="9" height="9" class="bar-income" rx="2" />
+                    @SvgText("64", "213", "chart-axis-label", "Income")
+                    <rect x="110" y="205" width="9" height="9" class="bar-expense" rx="2" />
+                    @SvgText("122", "213", "chart-axis-label", "Expenses")
+                </svg>
             </div>
         }
+
+        @if (donutSlices.Any())
+        {
+            <div class="chart-card">
+                <div class="chart-card-title">Spending by category</div>
+                <svg viewBox="0 0 220 200" class="donut-svg">
+                    @foreach (var slice in donutSlices)
+                    {
+                        <path d="@slice.Path" fill="@slice.Color" class="donut-segment" />
+                    }
+                </svg>
+                <div class="donut-legend">
+                    @foreach (var slice in donutSlices)
+                    {
+                        <div class="donut-legend-row">
+                            <span class="donut-dot" style="background-color:@slice.Color"></span>
+                            <span class="donut-cat">@slice.Category</span>
+                            <span class="donut-pct">@slice.PctText</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
     </div>
 }
 
 <div class="section-header">
     <span class="section-title">Transactions</span>
-    <a href="/add" class="btn-primary">＋ Add Transaction</a>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+        <button class="btn-ghost" @onclick="ExportCsv">Export CSV</button>
+        <a href="/add" class="btn-primary">Add Transaction</a>
+    </div>
 </div>
 
-<div class="filter-tabs">
-    <button class="filter-tab @(activeFilter == "ALL"     ? "active" : "")"
-            @onclick='() => activeFilter = "ALL"'>All</button>
-    <button class="filter-tab @(activeFilter == "INCOME"  ? "active" : "")"
-            @onclick='() => activeFilter = "INCOME"'>Income</button>
-    <button class="filter-tab @(activeFilter == "EXPENSE" ? "active" : "")"
-            @onclick='() => activeFilter = "EXPENSE"'>Expenses</button>
+<div class="filter-bar">
+    <div class="filter-tabs">
+        <button class="filter-tab @(activeFilter == "ALL" ? "active" : "")" @onclick='() => activeFilter = "ALL"'>All</button>
+        <button class="filter-tab @(activeFilter == "INCOME" ? "active" : "")" @onclick='() => activeFilter = "INCOME"'>Income</button>
+        <button class="filter-tab @(activeFilter == "EXPENSE" ? "active" : "")" @onclick='() => activeFilter = "EXPENSE"'>Expenses</button>
+    </div>
+    <div class="date-range">
+        <input type="text" class="form-control date-input"
+               @bind="filterFrom" @bind:format="dd/MM/yyyy"
+               placeholder="From DD/MM/YYYY" />
+        <span class="date-sep">to</span>
+        <input type="text" class="form-control date-input"
+               @bind="filterTo" @bind:format="dd/MM/yyyy"
+               placeholder="To DD/MM/YYYY" />
+        @if (filterFrom.HasValue || filterTo.HasValue)
+        {
+            <button class="btn-ghost" style="padding:0.35rem 0.75rem;font-size:0.8rem;"
+                    @onclick="ClearDateFilter">Clear</button>
+        }
+    </div>
 </div>
 
-@if (transactions == null)
+@if (isLoading)
 {
     <p class="loading">Loading transactions...</p>
+}
+else if (!string.IsNullOrEmpty(loadError))
+{
+    <div class="tx-table"><div class="empty-state">@loadError</div></div>
 }
 else if (!FilteredTransactions.Any())
 {
     <div class="tx-table">
-        <div class="empty-state">No transactions found.</div>
+        <div class="empty-state">
+            @((transactions?.Count ?? 0) == 0 ? "No transactions yet" : "No transactions found.")
+        </div>
     </div>
 }
 else
@@ -83,69 +136,30 @@ else
         <table>
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Category</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th></th>
+                    <th>Date</th><th>Description</th><th>Category</th>
+                    <th>Type</th><th>Amount</th><th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var t in FilteredTransactions)
                 {
                     <tr>
-                        <td><span class="tx-date">@FormatDate(t.Date)</span></td> 
+                        <td><span class="tx-date">@FormatDate(t.Date)</span></td>
                         <td>@t.Description</td>
                         <td>@t.Category</td>
-                        <td><span class="badge @t.Type.ToLower()">@t.Type</span></td>
+                        <td><span class="badge @t.Type.ToLowerInvariant()">@t.Type</span></td>
                         <td>
-                            <span class="tx-amount @t.Type.ToLower()">
-                                @(t.Type == "INCOME" ? "+" : "-")€@t.Amount.ToString("F2")
+                            <span class="tx-amount @t.Type.ToLowerInvariant()">
+                                @(t.Type == "INCOME" ? "+" : "-")EUR @FormatNumber(t.Amount)
                             </span>
                         </td>
-                        <td>
-                            <button class="btn-danger-sm" @onclick="() => Delete(t.Id)">
-                                remove
-                            </button>
+                        <td class="tx-actions">
+                            <a href="/edit/@t.Id" class="btn-edit">Edit</a>
+                            <button class="btn-danger-sm" @onclick="() => Delete(t.Id)">Remove</button>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-}
-
-@code {
-    private List<Transaction>? transactions;
-    private Summary? summary;
-    private Dictionary<string, double>? categories;
-    private string activeFilter = "ALL";
-
-    private IEnumerable<Transaction> FilteredTransactions =>
-        activeFilter == "ALL"
-            ? transactions!
-            : transactions!.Where(t => t.Type == activeFilter);
-
-    protected override async Task OnInitializedAsync() => await LoadData();
-
-    private async Task LoadData()
-    {
-        transactions = await Http.GetFromJsonAsync<List<Transaction>>("api/transactions");
-        summary      = await Http.GetFromJsonAsync<Summary>("api/transactions/summary");
-        categories   = await Http.GetFromJsonAsync<Dictionary<string, double>>("api/transactions/categories");
-    }
-
-    private async Task Delete(long id)
-    {
-        await Http.DeleteAsync($"api/transactions/{id}");
-        await LoadData();
-    }
-
-    private string FormatDate(string date)
-    {
-    if (DateOnly.TryParse(date, out var d))
-        return d.ToString("dd/MM/yyyy");
-    return date;
-    }
 }

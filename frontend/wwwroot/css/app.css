@@ -530,3 +530,115 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
     flex-shrink: 0;
     transition: color 0.15s;
 }
+
+/* ── Charts layout ── */
+.charts-row {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+    align-items: start;
+}
+
+.chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+}
+
+.chart-card-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+/* ── Bar chart SVG classes ── */
+.bar-chart-svg   { width: 100%; height: auto; }
+.chart-axis-label { font-family: var(--font-mono); font-size: 10px; fill: #64748b; }
+.chart-grid-line  { stroke: #1e2d40; stroke-width: 0.5; stroke-dasharray: 4,3; }
+.chart-base-line  { stroke: #2a3a52; stroke-width: 1; }
+.bar-income       { fill: #10b981; }
+.bar-expense      { fill: #f43f5e; }
+
+/* ── Donut in chart card ── */
+.chart-card .donut-svg { width: 100%; height: auto; }
+
+.chart-card .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.chart-card .donut-legend-row {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.chart-card .donut-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.chart-card .donut-cat {
+    color: var(--text-primary);
+}
+
+.chart-card .donut-pct {
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+/* ── Date range filter ── */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.date-input  { width: 138px; padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+.date-sep    { color: var(--text-muted); font-size: 0.85rem; }
+
+/* ── Edit button & action cell ── */
+.tx-actions { display: flex; gap: 0.5rem; align-items: center; white-space: nowrap; }
+
+.btn-edit {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.25rem 0.65rem;
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.btn-edit:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-dim);
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+    .charts-row { grid-template-columns: 1fr; }
+    .date-input  { width: 118px; }
+}
