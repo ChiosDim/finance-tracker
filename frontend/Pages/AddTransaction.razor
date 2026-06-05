@@ -1,12 +1,13 @@
 @page "/add"
+@page "/edit/{Id:long}"
 @inject HttpClient Http
 @inject NavigationManager Nav
 @using frontend.Models
 
-<PageTitle>Add Transaction — Finance Tracker</PageTitle>
+<PageTitle>@(IsEditing ? "Edit" : "Add") Transaction — Finance Tracker</PageTitle>
 
-<h1 class="page-title">Add Transaction</h1>
-<p class="page-subtitle">Record a new income or expense</p>
+<h1 class="page-title">@(IsEditing ? "Edit" : "Add") Transaction</h1>
+<p class="page-subtitle">@(IsEditing ? "Update the details below" : "Record a new income or expense")</p>
 
 <div class="form-card">
 
@@ -39,11 +40,10 @@
 
     <div class="form-group">
         <label class="form-label">Date</label>
-        <input type="text"
-            class="form-control"
-            @bind="selectedDate"
-            @bind:format="dd/MM/yyyy"
-            placeholder="DD/MM/YYYY" />
+        <input type="text" class="form-control"
+               @bind="selectedDate"
+               @bind:format="dd/MM/yyyy"
+               placeholder="DD/MM/YYYY" />
     </div>
 
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -52,39 +52,56 @@
     }
 
     <div class="form-actions">
-        <button class="btn-primary" @onclick="Submit">Save Transaction</button>
+        <button class="btn-primary" @onclick="Submit">
+            @(IsEditing ? "Update Transaction" : "Save Transaction")
+        </button>
         <a href="/" class="btn-ghost">Cancel</a>
     </div>
 
 </div>
 
 @code {
+    [Parameter] public long Id { get; set; }
+
+    private bool IsEditing => Id != 0;
     private Transaction newTransaction = new();
     private DateTime selectedDate = DateTime.Today;
     private string errorMessage = "";
 
-  private async Task Submit()
-{
-    if (string.IsNullOrWhiteSpace(newTransaction.Description) ||
-        string.IsNullOrWhiteSpace(newTransaction.Type) ||
-        string.IsNullOrWhiteSpace(newTransaction.Category) ||
-        newTransaction.Amount <= 0)
+    protected override async Task OnInitializedAsync()
     {
-        errorMessage = "Please fill in all fields with valid values.";
-        return;
+        if (IsEditing)
+        {
+            var t = await Http.GetFromJsonAsync<Transaction>($"api/transactions/{Id}");
+            if (t != null)
+            {
+                newTransaction = t;
+                if (DateTime.TryParse(t.Date, out var d))
+                    selectedDate = d;
+            }
+        }
     }
 
-    newTransaction.Date = selectedDate.ToString("yyyy-MM-dd");
-
-    var response = await Http.PostAsJsonAsync("api/transactions", newTransaction);
-
-    if (response.IsSuccessStatusCode)
+    private async Task Submit()
     {
-        Nav.NavigateTo("/");
+        if (string.IsNullOrWhiteSpace(newTransaction.Description) ||
+            string.IsNullOrWhiteSpace(newTransaction.Type) ||
+            string.IsNullOrWhiteSpace(newTransaction.Category) ||
+            newTransaction.Amount <= 0)
+        {
+            errorMessage = "Please fill in all fields with valid values.";
+            return;
+        }
+
+        newTransaction.Date = selectedDate.ToString("yyyy-MM-dd");
+
+        var response = IsEditing
+            ? await Http.PutAsJsonAsync($"api/transactions/{Id}", newTransaction)
+            : await Http.PostAsJsonAsync("api/transactions", newTransaction);
+
+        if (response.IsSuccessStatusCode)
+            Nav.NavigateTo("/");
+        else
+            errorMessage = $"Failed to save. Server returned: {(int)response.StatusCode}";
     }
-    else
-    {
-        errorMessage = $"Failed to save transaction. Server returned: {(int)response.StatusCode}";
-    }
-}
 }
