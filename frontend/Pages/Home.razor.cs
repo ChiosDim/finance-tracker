@@ -22,7 +22,8 @@ public partial class Home
     private List<BarItem> barItems = new();
     private List<TickItem> yTicks = new();
     private List<DonutSlice> donutSlices = new();
-    private string donutTotal = "";
+    private bool isLoading = true;
+    private string loadError = "";
 
     private IEnumerable<Transaction> FilteredTransactions =>
         (transactions ?? new List<Transaction>()).Where(t =>
@@ -49,13 +50,76 @@ public partial class Home
 
     private async Task LoadData()
     {
-        transactions = await Http.GetFromJsonAsync<List<Transaction>>("api/transactions");
-        summary = await Http.GetFromJsonAsync<Summary>("api/transactions/summary");
-        categories = await Http.GetFromJsonAsync<Dictionary<string, double>>("api/transactions/categories");
-        monthly = await Http.GetFromJsonAsync<List<MonthlyData>>("api/transactions/monthly");
-        ComputeBarChart();
-        ComputeDonut();
+        isLoading = true;
+        loadError = "";
+        barItems.Clear();
+        yTicks.Clear();
+        donutSlices.Clear();
+
+        try
+        {
+            transactions = await Http.GetFromJsonAsync<List<Transaction>>("api/transactions") ?? new();
+            summary = BuildSummary(transactions);
+            categories = BuildCategories(transactions);
+            monthly = BuildMonthly(transactions);
+            ComputeBarChart();
+            ComputeDonut();
+        }
+        catch (Exception ex)
+        {
+            transactions = new();
+            summary = new Summary();
+            categories = new();
+            monthly = new();
+            loadError = $"Could not load transactions: {ex.Message}";
+            return;
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
+
+    private static Summary BuildSummary(IEnumerable<Transaction> source)
+    {
+        var income = source
+            .Where(t => string.Equals(t.Type, "INCOME", StringComparison.OrdinalIgnoreCase))
+            .Sum(t => t.Amount);
+
+        var expense = source
+            .Where(t => string.Equals(t.Type, "EXPENSE", StringComparison.OrdinalIgnoreCase))
+            .Sum(t => t.Amount);
+
+        return new Summary
+        {
+            Income = income,
+            Expense = expense,
+            Balance = income - expense
+        };
+    }
+
+    private static Dictionary<string, double> BuildCategories(IEnumerable<Transaction> source) =>
+        source
+            .Where(t => string.Equals(t.Type, "EXPENSE", StringComparison.OrdinalIgnoreCase))
+            .GroupBy(t => string.IsNullOrWhiteSpace(t.Category) ? "Uncategorized" : t.Category)
+            .ToDictionary(group => group.Key, group => group.Sum(t => t.Amount));
+
+    private static List<MonthlyData> BuildMonthly(IEnumerable<Transaction> source) =>
+        source
+            .Where(t => !string.IsNullOrWhiteSpace(t.Date) && t.Date.Length >= 7)
+            .GroupBy(t => t.Date[..7])
+            .OrderBy(group => group.Key)
+            .Select(group => new MonthlyData
+            {
+                Month = group.Key,
+                Income = group
+                    .Where(t => string.Equals(t.Type, "INCOME", StringComparison.OrdinalIgnoreCase))
+                    .Sum(t => t.Amount),
+                Expense = group
+                    .Where(t => string.Equals(t.Type, "EXPENSE", StringComparison.OrdinalIgnoreCase))
+                    .Sum(t => t.Amount)
+            })
+            .ToList();
 
     private async Task Delete(long id)
     {
@@ -222,7 +286,6 @@ public partial class Home
     private void ComputeDonut()
     {
         donutSlices.Clear();
-        donutTotal = "";
 
         if (categories == null || !categories.Any())
         {
@@ -236,8 +299,6 @@ public partial class Home
         {
             return;
         }
-
-        donutTotal = $"EUR {FormatNumber(total, "F0")}";
 
         double start = -90;
         double cx = 110;

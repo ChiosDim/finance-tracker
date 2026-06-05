@@ -67,14 +67,12 @@
                     {
                         <path d="@slice.Path" fill="@slice.Color" class="donut-segment" />
                     }
-                    @SvgText("110", "96", "donut-label-sm", "expenses", "middle")
-                    @SvgText("110", "114", "donut-label-lg", donutTotal, "middle")
                 </svg>
                 <div class="donut-legend">
                     @foreach (var slice in donutSlices)
                     {
                         <div class="donut-legend-row">
-                            <span class="donut-dot" style="background:@slice.Color"></span>
+                            <span class="donut-dot" style="background-color:@slice.Color"></span>
                             <span class="donut-cat">@slice.Category</span>
                             <span class="donut-pct">@slice.PctText</span>
                         </div>
@@ -116,13 +114,21 @@
     </div>
 </div>
 
-@if (transactions == null)
+@if (isLoading)
 {
     <p class="loading">Loading transactions...</p>
 }
+else if (!string.IsNullOrEmpty(loadError))
+{
+    <div class="tx-table"><div class="empty-state">@loadError</div></div>
+}
 else if (!FilteredTransactions.Any())
 {
-    <div class="tx-table"><div class="empty-state">No transactions found.</div></div>
+    <div class="tx-table">
+        <div class="empty-state">
+            @((transactions?.Count ?? 0) == 0 ? "No transactions yet" : "No transactions found.")
+        </div>
+    </div>
 }
 else
 {
@@ -148,8 +154,8 @@ else
                             </span>
                         </td>
                         <td class="tx-actions">
-                            <a href="/edit/@t.Id" class="btn-edit">edit</a>
-                            <button class="btn-danger-sm" @onclick="() => Delete(t.Id)">remove</button>
+                            <a href="/edit/@t.Id" class="btn-edit">Edit</a>
+                            <button class="btn-danger-sm" @onclick="() => Delete(t.Id)">Remove</button>
                         </td>
                     </tr>
                 }

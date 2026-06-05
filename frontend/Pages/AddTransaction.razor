@@ -2,14 +2,16 @@
 @page "/edit/{Id:long}"
 @inject HttpClient Http
 @inject NavigationManager Nav
+@using System.Globalization
 @using frontend.Models
+@using Microsoft.AspNetCore.Components.Forms
 
-<PageTitle>@(IsEditing ? "Edit" : "Add") Transaction — Finance Tracker</PageTitle>
+<PageTitle>@(IsEditing ? "Edit" : "Add") Transaction - Finance Tracker</PageTitle>
 
 <h1 class="page-title">@(IsEditing ? "Edit" : "Add") Transaction</h1>
 <p class="page-subtitle">@(IsEditing ? "Update the details below" : "Record a new income or expense")</p>
 
-<div class="form-card">
+<EditForm Model="@newTransaction" OnSubmit="@Submit" class="form-card">
 
     <div class="form-group">
         <label class="form-label">Description</label>
@@ -18,7 +20,7 @@
     </div>
 
     <div class="form-group">
-        <label class="form-label">Amount (€)</label>
+        <label class="form-label">Amount (EUR)</label>
         <input type="number" class="form-control" @bind="newTransaction.Amount"
                placeholder="0.00" min="0" step="0.01" />
     </div>
@@ -26,7 +28,7 @@
     <div class="form-group">
         <label class="form-label">Type</label>
         <select class="form-select" @bind="newTransaction.Type">
-            <option value="">— Select type —</option>
+            <option value="">Select type</option>
             <option value="INCOME">Income</option>
             <option value="EXPENSE">Expense</option>
         </select>
@@ -40,10 +42,9 @@
 
     <div class="form-group">
         <label class="form-label">Date</label>
-        <input type="text" class="form-control"
+        <input type="date" class="form-control"
                @bind="selectedDate"
-               @bind:format="dd/MM/yyyy"
-               placeholder="DD/MM/YYYY" />
+               @bind:format="yyyy-MM-dd" />
     </div>
 
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -52,13 +53,13 @@
     }
 
     <div class="form-actions">
-        <button class="btn-primary" @onclick="Submit">
-            @(IsEditing ? "Update Transaction" : "Save Transaction")
+        <button type="submit" class="btn-primary" disabled="@isSaving">
+            @(isSaving ? "Saving..." : IsEditing ? "Update Transaction" : "Save Transaction")
         </button>
         <a href="/" class="btn-ghost">Cancel</a>
     </div>
 
-</div>
+</EditForm>
 
 @code {
     [Parameter] public long Id { get; set; }
@@ -67,6 +68,7 @@
     private Transaction newTransaction = new();
     private DateTime selectedDate = DateTime.Today;
     private string errorMessage = "";
+    private bool isSaving;
 
     protected override async Task OnInitializedAsync()
     {
@@ -77,13 +79,22 @@
             {
                 newTransaction = t;
                 if (DateTime.TryParse(t.Date, out var d))
+                {
                     selectedDate = d;
+                }
             }
         }
     }
 
-    private async Task Submit()
+    private async Task Submit(EditContext _)
     {
+        if (isSaving)
+        {
+            return;
+        }
+
+        errorMessage = "";
+
         if (string.IsNullOrWhiteSpace(newTransaction.Description) ||
             string.IsNullOrWhiteSpace(newTransaction.Type) ||
             string.IsNullOrWhiteSpace(newTransaction.Category) ||
@@ -93,15 +104,30 @@
             return;
         }
 
-        newTransaction.Date = selectedDate.ToString("yyyy-MM-dd");
+        newTransaction.Date = selectedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        isSaving = true;
 
-        var response = IsEditing
-            ? await Http.PutAsJsonAsync($"api/transactions/{Id}", newTransaction)
-            : await Http.PostAsJsonAsync("api/transactions", newTransaction);
+        try
+        {
+            var response = IsEditing
+                ? await Http.PutAsJsonAsync($"api/transactions/{Id}", newTransaction)
+                : await Http.PostAsJsonAsync("api/transactions", newTransaction);
 
-        if (response.IsSuccessStatusCode)
-            Nav.NavigateTo("/");
-        else
+            if (response.IsSuccessStatusCode)
+            {
+                Nav.NavigateTo("/");
+                return;
+            }
+
             errorMessage = $"Failed to save. Server returned: {(int)response.StatusCode}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to save transaction: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
     }
 }
