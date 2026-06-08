@@ -2,6 +2,8 @@
 @page "/"
 @inject HttpClient Http
 @inject IJSRuntime JS
+@inject BudgetService BudgetService
+@inject SavingsGoalService SavingsGoalService
 @using frontend.Layout
 
 <PageTitle>Dashboard - Finance Tracker</PageTitle>
@@ -93,7 +95,7 @@
 
 <div class="section-header">
     <span class="section-title">Transactions</span>
-    <div style="display:flex;gap:0.75rem;align-items:center;">
+    <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
         <button class="btn-ghost" @onclick="ExportCsv" disabled="@isExporting">
             @if (isExporting)
             {
@@ -105,6 +107,44 @@
                 @:Export CSV
             }
         </button>
+
+        <!-- Search Box -->
+        <div style="display:flex;align-items:center;gap:0.5rem;min-width:200px;">
+            <input type="text"
+                   class="form-control"
+                   placeholder="Search transactions..."
+                   @bind="searchTerm"
+                   @bind:event="oninput"
+                   style="width:200px;" />
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+            <label class="form-label" style="margin-bottom:0;">Sort by:</label>
+            <select class="form-select"
+                    @bind="sortBy"
+                    @bind:event="onchange"
+                    style="width:100px;">
+                <option value="date">Date</option>
+                <option value="amount">Amount</option>
+                <option value="description">Description</option>
+                <option value="category">Category</option>
+            </select>
+
+            <button class="btn-ghost"
+                    @onclick="() => sortDescending = !sortDescending"
+                    style="width:30px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;">
+                @if (sortDescending)
+                {
+                    <span>▼</span>
+                }
+                else
+                {
+                    <span>▲</span>
+                }
+            </button>
+        </div>
+
         <a href="/add" class="btn-primary">Add Transaction</a>
     </div>
 </div>

@@ -18,6 +18,17 @@ public partial class Home
     private string activeFilter = "ALL";
     private DateTime? filterFrom;
     private DateTime? filterTo;
+    private string searchTerm = "";
+    private string sortBy = "date";
+    private bool sortDescending = true;
+
+    // Budget and savings goal related
+    private List<Budget> budgets = new();
+    private List<SavingsGoal> savingsGoals = new();
+    private List<Dictionary<string, object>> budgetVsActual = new();
+    private string selectedMonthForBudget = ""; // Format: yyyy-MM
+    private bool isLoadingBudgets = false;
+    private bool isLoadingSavingsGoals = false;
 
     private List<BarItem> barItems = new();
     private List<TickItem> yTicks = new();
@@ -28,26 +39,65 @@ public partial class Home
     private bool isClearingFilter = false;
     private long? deletingTransactionId = null;
 
-    private IEnumerable<Transaction> FilteredTransactions =>
-        (transactions ?? new List<Transaction>()).Where(t =>
+    private IEnumerable<Transaction> FilteredTransactions
+    {
+        get
         {
-            if (activeFilter != "ALL" && t.Type != activeFilter)
-            {
-                return false;
-            }
+            var filtered = (transactions ?? new List<Transaction>())
+                .Where(t =>
+                {
+                    // Type filter
+                    if (activeFilter != "ALL" && t.Type != activeFilter)
+                    {
+                        return false;
+                    }
 
-            if (filterFrom.HasValue && DateTime.TryParse(t.Date, out var df) && df < filterFrom.Value)
-            {
-                return false;
-            }
+                    // Date range filter
+                    if (filterFrom.HasValue && DateTime.TryParse(t.Date, out var df) && df < filterFrom.Value)
+                    {
+                        return false;
+                    }
 
-            if (filterTo.HasValue && DateTime.TryParse(t.Date, out var dt) && dt > filterTo.Value)
-            {
-                return false;
-            }
+                    if (filterTo.HasValue && DateTime.TryParse(t.Date, out var dt) && dt > filterTo.Value)
+                    {
+                        return false;
+                    }
 
-            return true;
-        });
+                    // Search filter
+                    if (!string.IsNullOrWhiteSpace(searchTerm))
+                    {
+                        var lowerSearch = searchTerm.ToLowerInvariant();
+                        if (!(t.Description?.ToLowerInvariant().Contains(lowerSearch) ?? false) &&
+                            !(t.Category?.ToLowerInvariant().Contains(lowerSearch) ?? false))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+
+            // Apply sorting
+            return sortBy switch
+            {
+                "date" => sortDescending
+                    ? filtered.OrderByDescending(t => DateTime.Parse(t.Date ?? "1900-01-01"))
+                    : filtered.OrderBy(t => DateTime.Parse(t.Date ?? "1900-01-01")),
+                "amount" => sortDescending
+                    ? filtered.OrderByDescending(t => t.Amount)
+                    : filtered.OrderBy(t => t.Amount),
+                "description" => sortDescending
+                    ? filtered.OrderByDescending(t => t.Description ?? "")
+                    : filtered.OrderBy(t => t.Description ?? ""),
+                "category" => sortDescending
+                    ? filtered.OrderByDescending(t => t.Category ?? "")
+                    : filtered.OrderBy(t => t.Category ?? ""),
+                _ => sortDescending
+                    ? filtered.OrderByDescending(t => DateTime.Parse(t.Date ?? "1900-01-01"))
+                    : filtered.OrderBy(t => DateTime.Parse(t.Date ?? "1900-01-01"))
+            };
+        }
+    }
 
     // Toast notification helper
     private async Task ShowToast(string message, string type = "info")
