@@ -2,6 +2,7 @@
 @page "/"
 @inject HttpClient Http
 @inject IJSRuntime JS
+@using frontend.Layout
 
 <PageTitle>Dashboard - Finance Tracker</PageTitle>
 
@@ -46,8 +47,12 @@
                     <line x1="48" y1="175" x2="485" y2="175" class="chart-base-line" />
                     @foreach (var bar in barItems)
                     {
-                        <rect x="@bar.IncomeX" y="@bar.IncomeY" width="@bar.BarW" height="@bar.IncomeH" class="bar-income" rx="3" />
-                        <rect x="@bar.ExpenseX" y="@bar.ExpenseY" width="@bar.BarW" height="@bar.ExpenseH" class="bar-expense" rx="3" />
+                        <rect x="@bar.IncomeX" y="@bar.IncomeY" width="@bar.BarW" height="@bar.IncomeH" class="bar-income" rx="3">
+                            <title>+EUR @FormatNumber(bar.IncomeValue, "F2")</title>
+                        </rect>
+                        <rect x="@bar.ExpenseX" y="@bar.ExpenseY" width="@bar.BarW" height="@bar.ExpenseH" class="bar-expense" rx="3">
+                            <title>-EUR @FormatNumber(bar.ExpenseValue, "F2")</title>
+                        </rect>
                         @SvgText(bar.LabelX, "190", "chart-axis-label", bar.Label, "middle")
                     }
                     <rect x="52" y="205" width="9" height="9" class="bar-income" rx="2" />
@@ -65,7 +70,9 @@
                 <svg viewBox="0 0 220 200" class="donut-svg">
                     @foreach (var slice in donutSlices)
                     {
-                        <path d="@slice.Path" fill="@slice.Color" class="donut-segment" />
+                        <path d="@slice.Path" fill="@slice.Color" class="donut-segment">
+                            <title>@slice.Category: EUR @FormatNumber(slice.Amount, "F2") (@slice.PctText)</title>
+                        </path>
                     }
                 </svg>
                 <div class="donut-legend">
@@ -87,7 +94,17 @@
 <div class="section-header">
     <span class="section-title">Transactions</span>
     <div style="display:flex;gap:0.75rem;align-items:center;">
-        <button class="btn-ghost" @onclick="ExportCsv">Export CSV</button>
+        <button class="btn-ghost" @onclick="ExportCsv" disabled="@isExporting">
+            @if (isExporting)
+            {
+                <span>Exporting...</span>
+                <Skeleton Type="rect" Width="20" Height="16" CssClass="ms-2" />
+            }
+            else
+            {
+                @:Export CSV
+            }
+        </button>
         <a href="/add" class="btn-primary">Add Transaction</a>
     </div>
 </div>
@@ -109,14 +126,125 @@
         @if (filterFrom.HasValue || filterTo.HasValue)
         {
             <button class="btn-ghost" style="padding:0.35rem 0.75rem;font-size:0.8rem;"
-                    @onclick="ClearDateFilter">Clear</button>
+                    @onclick="ClearDateFilter" disabled="@isClearingFilter">
+                @if (isClearingFilter)
+                {
+                    <span>Clearing...</span>
+                    <Skeleton Type="rect" Width="20" Height="16" CssClass="ms-2" />
+                }
+                else
+                {
+                    @:Clear
+                }
+            </button>
         }
     </div>
 </div>
 
 @if (isLoading)
 {
-    <p class="loading">Loading transactions...</p>
+    <div class="skeleton-loader">
+        <!-- Summary Cards Skeletons -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <Skeleton Type="rect" Width="100" Height="4" WidthIsPercent="true" />
+                <Skeleton Type="rect" Width="60" Height="24" WidthIsPercent="true" CssClass="mt-2" />
+                <Skeleton Type="rect" Width="40" Height="16" WidthIsPercent="true" CssClass="mt-1" />
+            </div>
+            <div class="summary-card">
+                <Skeleton Type="rect" Width="100" Height="4" WidthIsPercent="true" />
+                <Skeleton Type="rect" Width="60" Height="24" WidthIsPercent="true" CssClass="mt-2" />
+                <Skeleton Type="rect" Width="40" Height="16" WidthIsPercent="true" CssClass="mt-1" />
+            </div>
+            <div class="summary-card">
+                <Skeleton Type="rect" Width="100" Height="4" WidthIsPercent="true" />
+                <Skeleton Type="rect" Width="60" Height="24" WidthIsPercent="true" CssClass="mt-2" />
+                <Skeleton Type="rect" Width="40" Height="16" WidthIsPercent="true" CssClass="mt-1" />
+            </div>
+        </div>
+
+        <!-- Charts Skeletons -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-card-title">
+                    <Skeleton Type="rect" Width="50" Height="16" WidthIsPercent="true" CssClass="mb-2" />
+                </div>
+                <div class="chart-placeholder">
+                    <Skeleton Type="rect" Width="100" Height="180" WidthIsPercent="true" />
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-card-title">
+                    <Skeleton Type="rect" Width="50" Height="16" WidthIsPercent="true" CssClass="mb-2" />
+                </div>
+                <div class="chart-placeholder">
+                    <Skeleton Type="rect" Width="100" Height="180" WidthIsPercent="true" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction List Skeletons -->
+        <div class="section-header">
+            <span class="section-title">
+                <Skeleton Type="rect" Width="30" Height="16" WidthIsPercent="true" />
+            </span>
+            <div style="display:flex;gap:0.75rem;align-items:center;">
+                <button class="btn-ghost" disabled>
+                    <Skeleton Type="rect" Width="80" Height="28" />
+                </button>
+                <a href="/add" class="btn-primary" disabled>
+                    <Skeleton Type="rect" Width="100" Height="28" />
+                </a>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-tabs">
+                <button class="filter-tab" disabled>
+                    <Skeleton Type="rect" Width="40" Height="28" />
+                </button>
+                <button class="filter-tab" disabled>
+                    <Skeleton Type="rect" Width="60" Height="28" />
+                </button>
+                <button class="filter-tab" disabled>
+                    <Skeleton Type="rect" Width="60" Height="28" />
+                </button>
+            </div>
+            <div class="date-range">
+                <input type="text" class="form-control date-input" disabled placeholder="From DD/MM/YYYY" />
+                <span class="date-sep">to</span>
+                <input type="text" class="form-control date-input" disabled placeholder="To DD/MM/YYYY" />
+            </div>
+        </div>
+
+        <div class="tx-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th><Skeleton Type="rect" Width="80" Height="16" /></th>
+                        <th><Skeleton Type="rect" Width="150" Height="16" /></th>
+                        <th><Skeleton Type="rect" Width="100" Height="16" /></th>
+                        <th><Skeleton Type="rect" Width="60" Height="16" /></th>
+                        <th><Skeleton Type="rect" Width="80" Height="16" /></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < 5; i++)
+                    {
+                        <tr>
+                            <td><Skeleton Type="rect" Width="80" Height="16" /></td>
+                            <td><Skeleton Type="rect" Width="150" Height="16" /></td>
+                            <td><Skeleton Type="rect" Width="100" Height="16" /></td>
+                            <td><Skeleton Type="rect" Width="60" Height="16" /></td>
+                            <td><Skeleton Type="rect" Width="80" Height="16" /></td>
+                            <td></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 else if (!string.IsNullOrEmpty(loadError))
 {
@@ -126,7 +254,24 @@ else if (!FilteredTransactions.Any())
 {
     <div class="tx-table">
         <div class="empty-state">
-            @((transactions?.Count ?? 0) == 0 ? "No transactions yet" : "No transactions found.")
+            @if ((transactions?.Count ?? 0) == 0)
+            {
+                <div class="empty-state-illustration">
+                    <div class="empty-state-icon">📊</div>
+                    <h3>No transactions yet</h3>
+                    <p>Start by adding your first transaction to see your financial overview.</p>
+                    <a href="/add" class="btn-primary mt-3">Add First Transaction</a>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state-illustration">
+                    <div class="empty-state-icon">🔍</div>
+                    <h3>No transactions found</h3>
+                    <p>Try adjusting your filters to see transactions.</p>
+                    <button class="btn-ghost mt-3" @onclick="ClearDateFilter">Clear Filters</button>
+                </div>
+            }
         </div>
     </div>
 }
@@ -155,7 +300,17 @@ else
                         </td>
                         <td class="tx-actions">
                             <a href="/edit/@t.Id" class="btn-edit">Edit</a>
-                            <button class="btn-danger-sm" @onclick="() => Delete(t.Id)">Remove</button>
+                            <button class="btn-danger-sm" @onclick="() => ConfirmDelete(t.Id)" disabled="@(deletingTransactionId == t.Id)">
+                                @if (deletingTransactionId == t.Id)
+                                {
+                                    <span>Removing...</span>
+                                    <Skeleton Type="rect" Width="20" Height="16" CssClass="ms-2" />
+                                }
+                                else
+                                {
+                                    @:Remove
+                                }
+                            </button>
                         </td>
                     </tr>
                 }
