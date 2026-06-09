@@ -9,9 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
-    // Find budget by category and month
-    Optional<Budget> findByCategoryAndMonth(String category, String month);
+    // Find budget by category and budgetMonth
+    Optional<Budget> findByCategoryAndBudgetMonth(String category, String budgetMonth);
 
-    // Find all budgets for a specific month
-    List<Budget> findByMonth(String month);
+    // Find all budgets for a specific budgetMonth
+    List<Budget> findByBudgetMonth(String budgetMonth);
 }

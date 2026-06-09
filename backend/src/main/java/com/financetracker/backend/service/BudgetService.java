@@ -26,7 +26,7 @@ public class BudgetService {
 
         budget.setCategory(budgetDetails.getCategory());
         budget.setAmount(budgetDetails.getAmount());
-        budget.setMonth(budgetDetails.getMonth());
+        budget.setBudgetMonth(budgetDetails.getBudgetMonth());
 
         return budgetRepository.save(budget);
     }
@@ -38,11 +38,11 @@ public class BudgetService {
     }
 
     public Optional<Budget> getBudgetByCategoryAndMonth(String category, String month) {
-        return budgetRepository.findByCategoryAndMonth(category, month);
+        return budgetRepository.findByCategoryAndBudgetMonth(category, month);
     }
 
     public List<Budget> getBudgetsByMonth(String month) {
-        return budgetRepository.findByMonth(month);
+        return budgetRepository.findByBudgetMonth(month);
     }
 
     public List<Map<String, Object>> getBudgetVsActual(String month) {

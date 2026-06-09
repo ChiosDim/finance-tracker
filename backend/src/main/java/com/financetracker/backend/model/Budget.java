@@ -14,7 +14,7 @@ public class Budget {
 
     private String category;
     private double amount;
-    private String month; // Format: yyyy-MM
+    private String budgetMonth; // Format: yyyy-MM
 
     // Unique constraint: one budget per category per month
     // This would typically be handled with a unique constraint in the database
