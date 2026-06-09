@@ -8,7 +8,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // Point all HTTP calls at the Java backend
-var apiUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:8080/";
+var apiUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:8081/";
 builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri(apiUrl)
