@@ -7,7 +7,7 @@ A full-stack personal finance web application built with **Java Spring Boot** an
 ![.NET](https://img.shields.io/badge/.NET-8-512BD4?style=flat-square&logo=dotnet)
 ![Blazor](https://img.shields.io/badge/Blazor-WebAssembly-512BD4?style=flat-square&logo=blazor)
 ![H2](https://img.shields.io/badge/H2-Database-blue?style=flat-square)
-
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20App-success?style=flat-square&logo=netlify)](https://finance-tracker-chiosdim.netlify.app)
 ---
 
 ## 📸 Screenshots
