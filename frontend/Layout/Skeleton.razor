@@ -1,0 +1,25 @@
+@* Reusable skeleton loader component *@
+<div class="@CssClass" style="@Style">
+    @if (HasAnimation)
+    {
+        <div class="skeleton-animate"></div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Type { get; set; } = "text"; // text, rect, circle, line
+    [Parameter] public double Width { get; set; } = 100; // in px or %
+    [Parameter] public bool WidthIsPercent { get; set; } = false;
+    [Parameter] public double Height { get; set; } = 16; // in px
+    [Parameter] public double BorderRadius { get; set; } = 4; // in px
+    [Parameter] public int Count { get; set; } = 1; // number of skeleton elements to show
+    [Parameter] public bool HasAnimation { get; set; } = true;
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter] public string Style { get; set; } = "";
+
+    protected string GetWidthValue() =>
+        WidthIsPercent ? $"{Width}%" : $"{Width}px";
+
+    protected string GetHeightValue() => $"{Height}px";
+    protected string GetBorderRadiusValue() => $"{BorderRadius}px";
+}

@@ -18,33 +18,92 @@ public partial class Home
     private string activeFilter = "ALL";
     private DateTime? filterFrom;
     private DateTime? filterTo;
+    private string searchTerm = "";
+    private string sortBy = "date";
+    private bool sortDescending = true;
+
+    // Budget and savings goal related
+    private List<Budget> budgets = new();
+    private List<SavingsGoal> savingsGoals = new();
+    private List<Dictionary<string, object>> budgetVsActual = new();
+    private string selectedMonthForBudget = ""; // Format: yyyy-MM
+    private bool isLoadingBudgets = false;
+    private bool isLoadingSavingsGoals = false;
 
     private List<BarItem> barItems = new();
     private List<TickItem> yTicks = new();
     private List<DonutSlice> donutSlices = new();
     private bool isLoading = true;
     private string loadError = "";
+    private bool isExporting = false;
+    private bool isClearingFilter = false;
+    private long? deletingTransactionId = null;
 
-    private IEnumerable<Transaction> FilteredTransactions =>
-        (transactions ?? new List<Transaction>()).Where(t =>
+    private IEnumerable<Transaction> FilteredTransactions
+    {
+        get
         {
-            if (activeFilter != "ALL" && t.Type != activeFilter)
-            {
-                return false;
-            }
+            var filtered = (transactions ?? new List<Transaction>())
+                .Where(t =>
+                {
+                    // Type filter
+                    if (activeFilter != "ALL" && t.Type != activeFilter)
+                    {
+                        return false;
+                    }
 
-            if (filterFrom.HasValue && DateTime.TryParse(t.Date, out var df) && df < filterFrom.Value)
-            {
-                return false;
-            }
+                    // Date range filter
+                    if (filterFrom.HasValue && DateTime.TryParse(t.Date, out var df) && df < filterFrom.Value)
+                    {
+                        return false;
+                    }
 
-            if (filterTo.HasValue && DateTime.TryParse(t.Date, out var dt) && dt > filterTo.Value)
-            {
-                return false;
-            }
+                    if (filterTo.HasValue && DateTime.TryParse(t.Date, out var dt) && dt > filterTo.Value)
+                    {
+                        return false;
+                    }
 
-            return true;
-        });
+                    // Search filter
+                    if (!string.IsNullOrWhiteSpace(searchTerm))
+                    {
+                        var lowerSearch = searchTerm.ToLowerInvariant();
+                        if (!(t.Description?.ToLowerInvariant().Contains(lowerSearch) ?? false) &&
+                            !(t.Category?.ToLowerInvariant().Contains(lowerSearch) ?? false))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                });
+
+            // Apply sorting
+            return sortBy switch
+            {
+                "date" => sortDescending
+                    ? filtered.OrderByDescending(t => DateTime.Parse(t.Date ?? "1900-01-01"))
+                    : filtered.OrderBy(t => DateTime.Parse(t.Date ?? "1900-01-01")),
+                "amount" => sortDescending
+                    ? filtered.OrderByDescending(t => t.Amount)
+                    : filtered.OrderBy(t => t.Amount),
+                "description" => sortDescending
+                    ? filtered.OrderByDescending(t => t.Description ?? "")
+                    : filtered.OrderBy(t => t.Description ?? ""),
+                "category" => sortDescending
+                    ? filtered.OrderByDescending(t => t.Category ?? "")
+                    : filtered.OrderBy(t => t.Category ?? ""),
+                _ => sortDescending
+                    ? filtered.OrderByDescending(t => DateTime.Parse(t.Date ?? "1900-01-01"))
+                    : filtered.OrderBy(t => DateTime.Parse(t.Date ?? "1900-01-01"))
+            };
+        }
+    }
+
+    // Toast notification helper
+    private async Task ShowToast(string message, string type = "info")
+    {
+        await JS.InvokeVoidAsync("showToast", message, type);
+    }
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
@@ -64,6 +123,15 @@ public partial class Home
             monthly = BuildMonthly(transactions);
             ComputeBarChart();
             ComputeDonut();
+
+            // Clear any previous error
+            loadError = "";
+
+            // Show success toast if we have data
+            if (transactions != null && transactions.Any())
+            {
+                await ShowToast("Transactions loaded successfully!", "success");
+            }
         }
         catch (Exception ex)
         {
@@ -72,6 +140,7 @@ public partial class Home
             categories = new();
             monthly = new();
             loadError = $"Could not load transactions: {ex.Message}";
+            await ShowToast("Failed to load transactions. Please try again.", "error");
             return;
         }
         finally
@@ -123,27 +192,70 @@ public partial class Home
 
     private async Task Delete(long id)
     {
-        await Http.DeleteAsync($"api/transactions/{id}");
-        await LoadData();
+        deletingTransactionId = id;
+        try
+        {
+            await Http.DeleteAsync($"api/transactions/{id}");
+            await LoadData();
+            await ShowToast("Transaction deleted successfully!", "success");
+        }
+        finally
+        {
+            deletingTransactionId = null;
+        }
+    }
+
+    private async Task ConfirmDelete(long id)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this transaction?");
+        if (confirmed)
+        {
+            await Delete(id);
+        }
+        else
+        {
+            await ShowToast("Delete cancelled", "info");
+        }
     }
 
     private void ClearDateFilter()
     {
+        isClearingFilter = true;
         filterFrom = null;
         filterTo = null;
+        isClearingFilter = false;
     }
 
     private async Task ExportCsv()
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("Date,Description,Category,Type,Amount");
-
-        foreach (var t in transactions ?? new List<Transaction>())
+        if (transactions == null || !transactions.Any())
         {
-            sb.AppendLine($"{t.Date},{Csv(t.Description)},{Csv(t.Category)},{t.Type},{t.Amount}");
+            await ShowToast("No transactions to export", "warning");
+            return;
         }
 
-        await JS.InvokeVoidAsync("downloadFile", "transactions.csv", "text/csv", sb.ToString());
+        isExporting = true;
+        try
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Date,Description,Category,Type,Amount");
+
+            foreach (var t in transactions)
+            {
+                sb.AppendLine($"{t.Date},{Csv(t.Description)},{Csv(t.Category)},{t.Type},{t.Amount}");
+            }
+
+            await JS.InvokeVoidAsync("downloadFile", "transactions.csv", "text/csv", sb.ToString());
+            await ShowToast("Transactions exported successfully!", "success");
+        }
+        catch (Exception _)
+        {
+            await ShowToast("Failed to export transactions. Please try again.", "error");
+        }
+        finally
+        {
+            isExporting = false;
+        }
     }
 
     private static string Csv(string value)
@@ -198,6 +310,8 @@ public partial class Home
         public string LabelX = "";
         public string Label = "";
         public string BarW = "";
+        public double IncomeValue = 0;
+        public double ExpenseValue = 0;
     }
 
     private class TickItem
@@ -255,7 +369,9 @@ public partial class Home
                 ExpenseH = SvgNumber(Math.Max(eH, 0)),
                 LabelX = SvgNumber(gx),
                 Label = lbl,
-                BarW = SvgNumber(barW)
+                BarW = SvgNumber(barW),
+                IncomeValue = m.Income,
+                ExpenseValue = m.Expense
             });
         }
 
@@ -281,6 +397,8 @@ public partial class Home
         public string Color = "";
         public string Category = "";
         public string PctText = "";
+        public double Amount = 0;
+        public double Percentage = 0;
     }
 
     private void ComputeDonut()
@@ -330,7 +448,9 @@ public partial class Home
                        $"L {FormatNumber(x3)} {FormatNumber(y3)} A {innerR} {innerR} 0 {large} 0 {FormatNumber(x4)} {FormatNumber(y4)} Z",
                 Color = colors[idx % colors.Length],
                 Category = cat.Key,
-                PctText = $"{FormatNumber(pct * 100, "F0")}%"
+                PctText = $"{FormatNumber(pct * 100, "F0")}%",
+                Amount = cat.Value,
+                Percentage = pct * 100
             });
 
             start += sweep;

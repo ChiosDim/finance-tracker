@@ -2,6 +2,7 @@
 @page "/edit/{Id:long}"
 @inject HttpClient Http
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 @using System.Globalization
 @using frontend.Models
 @using Microsoft.AspNetCore.Components.Forms
@@ -54,7 +55,15 @@
 
     <div class="form-actions">
         <button type="submit" class="btn-primary" disabled="@isSaving">
-            @(isSaving ? "Saving..." : IsEditing ? "Update Transaction" : "Save Transaction")
+            @if (isSaving)
+            {
+                <span>Saving...</span>
+                <Skeleton Type="rect" Width="20" Height="16" CssClass="ms-2" />
+            }
+            else
+            {
+                @(IsEditing ? "Update Transaction" : "Save Transaction")
+            }
         </button>
         <a href="/" class="btn-ghost">Cancel</a>
     </div>
@@ -115,15 +124,18 @@
 
             if (response.IsSuccessStatusCode)
             {
+                await JS.InvokeVoidAsync("showToast", IsEditing ? "Transaction updated successfully!" : "Transaction saved successfully!", "success");
                 Nav.NavigateTo("/");
                 return;
             }
 
             errorMessage = $"Failed to save. Server returned: {(int)response.StatusCode}";
+            await JS.InvokeVoidAsync("showToast", "Failed to save transaction. Please try again.", "error");
         }
         catch (Exception ex)
         {
             errorMessage = $"Failed to save transaction: {ex.Message}";
+            await JS.InvokeVoidAsync("showToast", "Failed to save transaction. Please try again.", "error");
         }
         finally
         {

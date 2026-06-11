@@ -441,6 +441,84 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   color: var(--accent);
 }
 
+/* ── Skeleton Loader Styles ── */
+.skeleton-animate {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--bg-input) 0%,
+        var(--border-light) 50%,
+        var(--bg-input) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-loader {
+    opacity: 0.9;
+    /* Reduce opacity slightly to distinguish from loaded state */
+}
+
+.skeleton-loader .summary-grid,
+.skeleton-loader .charts-row,
+.skeleton-loader .tx-table {
+    /* Add some spacing to make skeletons look more like real content */
+}
+
+/* Add some margin to skeleton elements for better spacing */
+.skeleton-loader .summary-card {
+    margin-bottom: 1.25rem;
+}
+
+.skeleton-loader .chart-card {
+    margin-bottom: 1.25rem;
+}
+
+.skeleton-loader .section-header,
+.skeleton-loader .filter-bar,
+.skeleton-loader .tx-table {
+    margin-bottom: 2.5rem;
+}
+
+/* ── Enhanced Empty State Styles ── */
+.empty-state-illustration {
+    text-align: center;
+    padding: 3rem;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.empty-state-illustration h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    font-weight: 600;
+}
+
+.empty-state-illustration p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* ── Blazor error UI ── */
 #blazor-error-ui {
     display: none;
