@@ -1,0 +1,11 @@
+[build]
+  base = "frontend"
+  command = "dotnet publish -c Release"
+  publish = "bin/Release/net8.0/publish/wwwroot"
+
+[plugins]
+  # Optional: disable default Netlify plugins we don't need
+  [[plugins]]
+    package = "@netlify/plugin-sitemap"
+  [[plugins]]
+    package = "@netlify/plugin-html-optimiser"
