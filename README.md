@@ -12,7 +12,8 @@ A full-stack personal finance web application built with **Java Spring Boot** an
 
 ## 📸 Screenshots
 
- ![Dashboard](assets/dashboard.png)
+ ![Dashboard](assets/1.png)
+ ![Transactions](assets/2.png)
 
 
 ---
