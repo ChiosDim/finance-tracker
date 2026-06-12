@@ -1075,10 +1075,10 @@ E:\Github\finance-tracker\frontend\obj\Debug\net9.0\frontend.dll
 E:\Github\finance-tracker\frontend\obj\Debug\net9.0\refint\frontend.dll
 E:\Github\finance-tracker\frontend\obj\Debug\net9.0\frontend.pdb
 E:\Github\finance-tracker\frontend\obj\Debug\net9.0\ref\frontend.dll
-E:\Github\finance-tracker\frontend\bin\Debug\net9.0\wwwroot\_framework\frontend.k1pckifgcj.wasm
-E:\Github\finance-tracker\frontend\bin\Debug\net9.0\wwwroot\_framework\frontend.7papgcub2q.pdb
-E:\Github\finance-tracker\frontend\bin\Debug\net9.0\wwwroot\_framework\frontend.k1pckifgcj.wasm.gz
-E:\Github\finance-tracker\frontend\bin\Debug\net9.0\wwwroot\_framework\frontend.7papgcub2q.pdb.gz
-E:\Github\finance-tracker\frontend\obj\Debug\net9.0\compressed\qfulij7c2m-k1pckifgcj.gz
-E:\Github\finance-tracker\frontend\obj\Debug\net9.0\compressed\e1rpvsmwzk-7papgcub2q.gz
-E:\Github\finance-tracker\frontend\obj\Debug\net9.0\compressed\4odag4e21d-3fyto1j1eg.gz
+E:\Github\finance-tracker\frontend\bin\Debug\net9.0\wwwroot\_framework\frontend.k8l14rd8dh.wasm
+E:\Github\finance-tracker\frontend\bin\Debug\net9.0\wwwroot\_framework\frontend.4x5c32ydc6.pdb
+E:\Github\finance-tracker\frontend\bin\Debug\net9.0\wwwroot\_framework\frontend.k8l14rd8dh.wasm.gz
+E:\Github\finance-tracker\frontend\bin\Debug\net9.0\wwwroot\_framework\frontend.4x5c32ydc6.pdb.gz
+E:\Github\finance-tracker\frontend\obj\Debug\net9.0\compressed\qfulij7c2m-k8l14rd8dh.gz
+E:\Github\finance-tracker\frontend\obj\Debug\net9.0\compressed\e1rpvsmwzk-4x5c32ydc6.gz
+E:\Github\finance-tracker\frontend\obj\Debug\net9.0\compressed\4odag4e21d-pud0r8dxan.gz

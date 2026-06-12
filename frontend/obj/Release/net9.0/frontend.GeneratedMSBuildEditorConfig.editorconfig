@@ -28,6 +28,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/Github/finance-tracker/frontend/Layout/Skeleton.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XFNrZWxldG9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/Github/finance-tracker/frontend/Pages/AddTransaction.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRkVHJhbnNhY3Rpb24ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 

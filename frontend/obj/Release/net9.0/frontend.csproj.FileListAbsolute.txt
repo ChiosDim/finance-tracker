@@ -199,8 +199,6 @@ E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\dotnet.
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\icudt_CJK.tjcz0u77k5.dat
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\icudt_EFIGS.tptq2av103.dat
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\icudt_no_CJK.lfu7j35m59.dat
-E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\frontend.jgxkrfrfsj.wasm
-E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\frontend.c91x1u9ln2.pdb
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\blazor.boot.json
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\blazor.webassembly.js.gz
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\Microsoft.AspNetCore.Authorization.tnyc7xpluy.wasm.gz
@@ -403,8 +401,6 @@ E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\dotnet.
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\icudt_CJK.tjcz0u77k5.dat.gz
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\icudt_EFIGS.tptq2av103.dat.gz
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\icudt_no_CJK.lfu7j35m59.dat.gz
-E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\frontend.jgxkrfrfsj.wasm.gz
-E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\frontend.c91x1u9ln2.pdb.gz
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\blazor.boot.json.gz
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\frontend.staticwebassets.runtime.json
 E:\Github\finance-tracker\frontend\bin\Release\net9.0\frontend.staticwebassets.endpoints.json
@@ -819,8 +815,6 @@ E:\Github\finance-tracker\frontend\obj\Release\net9.0\scopedcss\bundle\frontend.
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\scopedcss\projectbundle\frontend.bundle.scp.css
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\blazor.build.boot-extension.json
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\blazor.boot.json
-E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\58hbteaqon-z46q0u9uj2.gz
-E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\dad134yrlb-lmxc3d8a6l.gz
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\3cgw5cayss-bqjiyaj88i.gz
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\sh9wo0m86a-c2jlpeoesf.gz
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\ksqnz9ioz6-erw9l3u2r3.gz
@@ -1070,9 +1064,6 @@ E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\z76n6h74sk-i8ix
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\ieimtkc9aa-tjcz0u77k5.gz
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\b7rnpg4o35-tptq2av103.gz
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\lha9phm1my-lfu7j35m59.gz
-E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\qfulij7c2m-jgxkrfrfsj.gz
-E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\e1rpvsmwzk-c91x1u9ln2.gz
-E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\4odag4e21d-wqebpb2gec.gz
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\staticwebassets.build.json
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\staticwebassets.build.json.cache
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\staticwebassets.development.json
@@ -1082,3 +1073,12 @@ E:\Github\finance-tracker\frontend\obj\Release\net9.0\frontend.dll
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\refint\frontend.dll
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\frontend.pdb
 E:\Github\finance-tracker\frontend\obj\Release\net9.0\ref\frontend.dll
+E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\frontend.ud9i2jzyb7.wasm
+E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\frontend.2j3uisqiml.pdb
+E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\frontend.ud9i2jzyb7.wasm.gz
+E:\Github\finance-tracker\frontend\bin\Release\net9.0\wwwroot\_framework\frontend.2j3uisqiml.pdb.gz
+E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\58hbteaqon-txizz0m87v.gz
+E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\dad134yrlb-6ppg2ken2j.gz
+E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\qfulij7c2m-ud9i2jzyb7.gz
+E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\e1rpvsmwzk-2j3uisqiml.gz
+E:\Github\finance-tracker\frontend\obj\Release\net9.0\compressed\4odag4e21d-mbsdfidf1g.gz

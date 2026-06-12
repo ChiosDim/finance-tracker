@@ -27,6 +27,104 @@
     <a class="dismiss">✕</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+    window.downloadFile = function (filename, contentType, content) {
+        const blob = new Blob([content], { type: contentType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    window.showToast = function (message, type = 'info') {
+        // Remove any existing toast
+        const existingToast = document.getElementById('toast-container');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create toast container
+        const toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.top = '20px';
+        toastContainer.style.right = '20px';
+        toastContainer.style.zIndex = '1050';
+        toastContainer.style.display = 'flex';
+        toastContainer.style.flexDirection = 'column';
+        toastContainer.style.gap = '10px';
+        toastContainer.style.maxWidth = '350px';
+        toastContainer.style.width = '100%';
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.style.display = 'flex';
+        toast.style.alignItems = 'center';
+        toast.style.padding = '1rem';
+        toast.style.borderRadius = 'var(--radius-sm)';
+        toast.style.color = '#fff';
+        toast.style.fontSize = '0.875rem';
+        toast.style.fontWeight = '500';
+        toast.style.boxShadow = '0 4px 24px rgba(0,0,0,0.4)';
+        toast.style.border = 'none';
+        toast.style.minWidth = '200px';
+        toast.style.justifyContent = 'space-between';
+
+        // Set background color based on type
+        switch (type) {
+            case 'success':
+                toast.style.background = 'var(--income)';
+                break;
+            case 'error':
+                toast.style.background = 'var(--expense)';
+                break;
+            case 'warning':
+                toast.style.background = 'var(--accent)';
+                break;
+            default: // info
+                toast.style.background = 'var(--accent)';
+                break;
+        }
+
+        // Create message span
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message;
+        messageSpan.style.flex = '1';
+
+        // Create close button
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.style.background = 'transparent';
+        closeBtn.style.border = 'none';
+        closeBtn.style.color = 'rgba(255,255,255,0.8)';
+        closeBtn.style.fontSize = '1.25rem';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.style.padding = '0';
+        closeBtn.style.lineHeight = '1';
+        closeBtn.onclick = () => {
+            toastContainer.remove();
+        };
+
+        // Assemble toast
+        toast.appendChild(messageSpan);
+        toast.appendChild(closeBtn);
+        toastContainer.appendChild(toast);
+
+        // Add to body
+        document.body.appendChild(toastContainer);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toastContainer.parentNode) {
+                toastContainer.remove();
+            }
+        }, 5000);
+    };
+</script>
 </body>
 
 </html>
