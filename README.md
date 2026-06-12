@@ -21,7 +21,9 @@ A full-stack personal finance web application built with **Java Spring Boot** an
 
 - **Transaction management** — add and delete income and expense entries
 - **Live dashboard** — balance, total income and total expenses update instantly
-- **Category breakdown** — visual progress bars showing spending per category
+- **Spending by category** — interactive donut chart showing expense breakdown
+- **Monthly overview** — bar chart of income vs expenses per month
+- **CSV export** — download all transactions as a CSV file
 - **Filter by type** — view all, income-only, or expense-only transactions
 - **Persistent storage** — data saved to a local H2 file database, survives restarts
 - **European date format** — dates displayed as DD/MM/YYYY throughout
@@ -113,6 +115,7 @@ Base URL: `http://localhost:8080/api/transactions`
 | `DELETE` | `/{id}` | Delete a transaction by ID |
 | `GET` | `/summary` | Get total income, expenses and balance |
 | `GET` | `/categories` | Get expense totals grouped by category |
+| `GET` | `/monthly` | Get monthly income and expenses for charting |
 
 ### Example request — create a transaction
 
@@ -149,7 +152,7 @@ finance-tracker/
     │   └── NavMenu.razor                   # Sidebar navigation
     ├── Models/Transaction.cs
     ├── Pages/
-    │   ├── Home.razor                      # Dashboard
+    │   ├── Home.razor                      # Dashboard (with charts)
     │   └── AddTransaction.razor            # Add transaction form
     └── wwwroot/css/app.css                 # Custom dark theme
 ```
@@ -159,11 +162,9 @@ finance-tracker/
 ## 🔮 Possible Future Improvements
 
 - [ ] Edit existing transactions
-- [ ] Monthly summary chart (bar or line)
-- [ ] CSV export
 - [ ] Multiple accounts / wallets
 - [ ] User authentication
-- [ ] Deploy backend to Railway or Render, frontend to GitHub Pages
+- [ ] Deploy backend to Railway or Render, frontend to GitHub Pages (already demo on Netlify + Render)
 
 ---
 
