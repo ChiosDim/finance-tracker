@@ -23,6 +23,7 @@ backend.pid
 
 # Claude Code
 .claude/
+CLAUDE.md
 
 # Netlify
 .netlify/

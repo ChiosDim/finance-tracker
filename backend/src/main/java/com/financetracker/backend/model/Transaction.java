@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", indexes = @Index(columnList = "date"))
 public class Transaction {
 
     @Id

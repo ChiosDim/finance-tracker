@@ -15,9 +15,7 @@ public class TransactionService {
     private final TransactionRepository repo;
 
     public List<Transaction> getAll() {
-        return repo.findAll().stream()
-            .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
-            .collect(Collectors.toList());
+        return repo.findAllOrderedByDateDesc();
     }
 
     public Optional<Transaction> getById(Long id) {
