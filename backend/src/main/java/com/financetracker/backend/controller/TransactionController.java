@@ -63,6 +63,6 @@ public class TransactionController {
     // NEW: Paginated endpoint for frontend
     @GetMapping("/page")
     public Page<Transaction> getTransactionsPaged(Pageable pageable) {
-        return repo.findAllPaged(pageable);
+        return service.getTransactionsPaged(pageable);
     }
 }

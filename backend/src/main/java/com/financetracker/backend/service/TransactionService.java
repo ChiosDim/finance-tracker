@@ -3,10 +3,11 @@ package com.financetracker.backend.service;
 import com.financetracker.backend.model.Transaction;
 import com.financetracker.backend.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,10 @@ public class TransactionService {
 
     public Optional<Transaction> getById(Long id) {
         return repo.findById(id);
+    }
+
+    public Page<Transaction> getTransactionsPaged(Pageable pageable) {
+        return repo.findAllPaged(pageable);
     }
 
     public Transaction create(Transaction transaction) {
