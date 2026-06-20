@@ -123,7 +123,6 @@
             <label class="form-label" style="margin-bottom:0;">Sort by:</label>
             <select class="form-select"
                     @bind="sortBy"
-                    @bind:event="onchange"
                     style="width:100px;">
                 <option value="date">Date</option>
                 <option value="amount">Amount</option>
@@ -357,4 +356,29 @@ else
             </tbody>
         </table>
     </div>
+
+    @if (pageInfo != null && pageInfo.TotalPages > 1)
+    {
+        <div class="paging-bar" style="margin:1rem 0;display:flex;align-items:center;gap:0.5rem;justify-content:center;">
+            <button class="btn-ghost" @onclick="PreviousPage" disabled="@(pageInfo?.First ?? true)">
+                ◀ Prev
+            </button>
+
+            <span>
+                Page @(pageInfo?.Number + 1 ?? 1) of @(pageInfo?.TotalPages ?? 1)
+                (showing @(transactions?.Count ?? 0) of @(pageInfo?.TotalElements ?? 0))
+            </span>
+
+            <button class="btn-ghost" @onclick="NextPage" disabled="@(pageInfo?.Last ?? true)">
+                Next ▶
+            </button>
+
+            <select class="form-select" style="width:80px;margin-left:auto;" @bind="PageSize">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    }
 }

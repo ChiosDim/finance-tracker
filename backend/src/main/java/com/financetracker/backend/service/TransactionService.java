@@ -37,11 +37,9 @@ public class TransactionService {
     }
 
     public Map<String, Double> getSummary() {
-        List<Transaction> all = repo.findAll();
-        double income  = all.stream().filter(t -> "INCOME".equalsIgnoreCase(t.getType()))
-            .mapToDouble(Transaction::getAmount).sum();
-        double expense = all.stream().filter(t -> "EXPENSE".equalsIgnoreCase(t.getType()))
-            .mapToDouble(Transaction::getAmount).sum();
+        Object[] result = repo.getSummaryAggregates();
+        double income = result[0] != null ? ((Number) result[0]).doubleValue() : 0.0;
+        double expense = result[1] != null ? ((Number) result[1]).doubleValue() : 0.0;
         Map<String, Double> summary = new HashMap<>();
         summary.put("income",  income);
         summary.put("expense", expense);
@@ -50,32 +48,24 @@ public class TransactionService {
     }
 
     public Map<String, Double> getCategoryBreakdown() {
-        return repo.findAll().stream()
-            .filter(t -> "EXPENSE".equalsIgnoreCase(t.getType()))
-            .collect(Collectors.groupingBy(
-                Transaction::getCategory,
-                Collectors.summingDouble(Transaction::getAmount)
-            ));
+        List<Object[]> results = repo.getCategoryBreakdownAggregates();
+        Map<String, Double> breakdown = new LinkedHashMap<>();
+        for (Object[] row : results) {
+            String category = (row[0] != null) ? row[0].toString() : "Uncategorized";
+            double total = (row[1] != null) ? ((Number) row[1]).doubleValue() : 0.0;
+            breakdown.put(category, total);
+        }
+        return breakdown;
     }
 
     public List<Map<String, Object>> getMonthlyBreakdown() {
-        // TreeMap keeps months sorted chronologically (yyyy-MM sorts lexicographically)
-        Map<String, double[]> monthly = new TreeMap<>();
-        for (Transaction t : repo.findAll()) {
-            if (t.getDate() == null || t.getDate().length() < 7) continue;
-            String month = t.getDate().substring(0, 7);
-            monthly.computeIfAbsent(month, k -> new double[]{0.0, 0.0});
-            if ("INCOME".equalsIgnoreCase(t.getType()))
-                monthly.get(month)[0] += t.getAmount();
-            else if ("EXPENSE".equalsIgnoreCase(t.getType()))
-                monthly.get(month)[1] += t.getAmount();
-        }
+        List<Object[]> results = repo.getMonthlyBreakdownAggregates();
         List<Map<String, Object>> result = new ArrayList<>();
-        for (var entry : monthly.entrySet()) {
+        for (Object[] row : results) {
             Map<String, Object> item = new LinkedHashMap<>();
-            item.put("month",   entry.getKey());
-            item.put("income",  entry.getValue()[0]);
-            item.put("expense", entry.getValue()[1]);
+            item.put("month",   (row[0] != null) ? row[0].toString() : "");
+            item.put("income",  (row[1] != null) ? ((Number) row[1]).doubleValue() : 0.0);
+            item.put("expense", (row[2] != null) ? ((Number) row[2]).doubleValue() : 0.0);
             result.add(item);
         }
         return result;

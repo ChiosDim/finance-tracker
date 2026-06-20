@@ -14,6 +14,7 @@ public partial class Home
     private Summary? summary;
     private Dictionary<string, double>? categories;
     private List<MonthlyData>? monthly;
+    private TransactionPage? pageInfo;
 
     private string activeFilter = "ALL";
     private DateTime? filterFrom;
@@ -22,13 +23,7 @@ public partial class Home
     private string sortBy = "date";
     private bool sortDescending = true;
 
-    // Budget and savings goal related
-    private List<Budget> budgets = new();
-    private List<SavingsGoal> savingsGoals = new();
-    private List<Dictionary<string, object>> budgetVsActual = new();
-    private string selectedMonthForBudget = ""; // Format: yyyy-MM
-    private bool isLoadingBudgets = false;
-    private bool isLoadingSavingsGoals = false;
+    // Budget and savings goal related - to be implemented
 
     private List<BarItem> barItems = new();
     private List<TickItem> yTicks = new();
@@ -107,7 +102,24 @@ public partial class Home
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
-    private async Task LoadData()
+    private int page = 0;
+	private int _pageSize = 20;
+
+	public int PageSize
+	{
+		get => _pageSize;
+		set
+		{
+			if (_pageSize != value)
+			{
+				_pageSize = value;
+				page = 0; // Reset to first page when changing page size
+				_ = LoadData(page, _pageSize); // Fire and forget since we're in a setter
+			}
+		}
+	}
+
+private async Task LoadData(int page = 0, int size = 20)
     {
         isLoading = true;
         loadError = "";
@@ -117,7 +129,9 @@ public partial class Home
 
         try
         {
-            transactions = await Http.GetFromJsonAsync<List<Transaction>>("api/transactions") ?? new();
+            var response = await Http.GetFromJsonAsync<TransactionPage>($"api/transactions/page?page={page}&size={size}");
+            pageInfo = response;
+            transactions = response?.Content ?? new();
             summary = BuildSummary(transactions);
             categories = BuildCategories(transactions);
             monthly = BuildMonthly(transactions);
@@ -248,13 +262,41 @@ public partial class Home
             await JS.InvokeVoidAsync("downloadFile", "transactions.csv", "text/csv", sb.ToString());
             await ShowToast("Transactions exported successfully!", "success");
         }
-        catch (Exception _)
+        catch
         {
             await ShowToast("Failed to export transactions. Please try again.", "error");
         }
         finally
         {
             isExporting = false;
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (page > 0)
+        {
+            page--;
+            await LoadData(page, _pageSize);
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (pageInfo != null && !pageInfo.Last)
+        {
+            page++;
+            await LoadData(page, _pageSize);
+        }
+    }
+
+    private async Task OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int size))
+        {
+            _pageSize = size;
+            page = 0; // Reset to first page when changing page size
+            await LoadData(page, _pageSize);
         }
     }
 

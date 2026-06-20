@@ -3,6 +3,8 @@ package com.financetracker.backend.controller;
 import com.financetracker.backend.model.Transaction;
 import com.financetracker.backend.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,5 +58,11 @@ public class TransactionController {
     @GetMapping("/monthly")
     public List<Map<String, Object>> getMonthly() {
         return service.getMonthlyBreakdown();
+    }
+
+    // NEW: Paginated endpoint for frontend
+    @GetMapping("/page")
+    public Page<Transaction> getTransactionsPaged(Pageable pageable) {
+        return repo.findAllPaged(pageable);
     }
 }

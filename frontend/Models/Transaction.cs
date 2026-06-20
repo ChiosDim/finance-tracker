@@ -23,3 +23,14 @@ public class MonthlyData
     public double Income { get; set; }
     public double Expense { get; set; }
 }
+
+public class TransactionPage
+{
+    public List<Transaction>? Content { get; set; }
+    public int Number { get; set; }
+    public int Size { get; set; }
+    public long TotalElements { get; set; }
+    public int TotalPages { get; set; }
+    public bool First { get; set; }
+    public bool Last { get; set; }
+}

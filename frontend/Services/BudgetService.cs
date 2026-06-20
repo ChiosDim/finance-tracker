@@ -15,14 +15,14 @@ namespace frontend.Services
             _http = http;
         }
 
-        public async Task<Budget> CreateBudgetAsync(Budget budget)
+        public async Task<Budget?> CreateBudgetAsync(Budget budget)
         {
             var response = await _http.PostAsJsonAsync("api/budgets", budget);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<Budget>();
         }
 
-        public async Task<Budget> UpdateBudgetAsync(long id, Budget budget)
+        public async Task<Budget?> UpdateBudgetAsync(long id, Budget budget)
         {
             var response = await _http.PutAsJsonAsync($"api/budgets/{id}", budget);
             response.EnsureSuccessStatusCode();
