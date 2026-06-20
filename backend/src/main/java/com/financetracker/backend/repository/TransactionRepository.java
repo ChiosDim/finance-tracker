@@ -12,8 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    // NEW: paged query, ordered by date desc
-    @Query("SELECT t FROM Transaction t ORDER BY t.date DESC")
+    // NEW: paged query
+    @Query("SELECT t FROM Transaction t")
     Page<Transaction> findAllPaged(Pageable pageable);
     // JpaRepository gives us everything for free
 
